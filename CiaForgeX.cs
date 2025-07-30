@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
@@ -13,7 +13,7 @@ public class CiaForgeX : EditorWindow
     public static void ShowWindow()
     {
         var window = GetWindow<CiaForgeX>("CiaForgeX");
-        window.position = new Rect(10, 30, 340, 255);
+        window.position = new Rect(10, 30, 340, 260);
         window.Show();
     }
 
@@ -62,7 +62,7 @@ public class CiaForgeX : EditorWindow
         string[] toolModeOptions = { "Build CIA", "Extract, Modify and Rebuild CIA" };
         int toolModeIndex = System.Array.IndexOf(toolModeOptions, toolMode);
         toolMode = toolModeOptions[EditorGUILayout.Popup("Export Mode ", toolModeIndex, toolModeOptions)];
-        if (systemMode == "64MB (Default)" && n3dsSystemMode == "Default") GUILayout.Label("It's recommended to use 'Build CIA' if SystemMode is not changed anyway", EditorStyles.helpBox);
+        if (systemMode == "64MB (Default)" && n3dsSystemMode == "Default" && toolMode == "Extract, Modify and Rebuild CIA") GUILayout.Label("It's recommended to use 'Build CIA' if SystemMode is not changed anyway", EditorStyles.helpBox);
 
         if (toolMode == "Extract, Modify and Rebuild CIA")
         {
@@ -81,6 +81,7 @@ public class CiaForgeX : EditorWindow
         GUILayout.Space(5);
         GUILayout.Label("Extra", EditorStyles.boldLabel);
         removeCCI = EditorGUILayout.Toggle("Remove CCI file", removeCCI);
+        if (!removeCCI && toolMode == "Extract, Modify and Rebuild CIA" && !(systemMode == "64MB (Default)" && n3dsSystemMode == "Default")) GUILayout.Label("The CCI file itself does not get modified, so it won't have extended memory mode enabled!", EditorStyles.helpBox);
         removeXML = EditorGUILayout.Toggle("Remove XML file", removeXML);
     }
 }
