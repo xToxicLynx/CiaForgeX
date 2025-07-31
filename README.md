@@ -12,7 +12,7 @@ Many thanks to [@CooingMaxito](https://www.github.com/CooingMaxito), who wrote t
 ## 📖Table of contents
 
 [1. Features✨](#features)<br>
-[2. Usage⚙️](#usage)<br>
+[2. Usage⚙️](#%EF%B8%8Fusage)<br>
 [3. RSF Injection Notes💉](#rsf-injection-notes)<br>
 [4. Troubleshooting🚩](#troubleshooting)<br>
 [5. Tools Used🔧](#tools-used)<br>
