@@ -11,11 +11,11 @@ Many thanks to [@CooingMaxito](https://www.github.com/CooingMaxito), who wrote t
 
 ## 📖Table of contents
 
-[1. Features✨](https://github.com/xToxicLynx/CiaForgeX/tree/main#features)<br>
-[2. Usage⚙️](https://github.com/xToxicLynx/CiaForgeX/tree/main#usage)<br>
-[3. RSF Injection Notes💉](https://github.com/xToxicLynx/CiaForgeX/tree/main?tab=readme-ov-file#rsf-injection-notes)<br>
-[4. Troubleshooting🚩](https://github.com/xToxicLynx/CiaForgeX/tree/main?tab=readme-ov-file#troubleshooting)<br>
-[5. Tools Used🔧](https://github.com/xToxicLynx/CiaForgeX/tree/main?tab=readme-ov-file#tools-used)<br>
+[1. Features✨](#features)<br>
+[2. Usage⚙️](#usage)<br>
+[3. RSF Injection Notes💉](#rsf-injection-notes)<br>
+[4. Troubleshooting🚩](#troubleshooting)<br>
+[5. Tools Used🔧](#tools-used)<br>
 <br>
 
 ---
