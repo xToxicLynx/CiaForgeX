@@ -88,7 +88,41 @@ For more information on rsf files check [here](https://github.com/3DSGuy/Project
 
 ## 🚩Troubleshooting
 
-not today
+In case you experience crashes trying to load up your game using a different SystemMode **other than** the **default (64 MB)**, try following these steps:
+
+1. Create a new (empty) project
+2. Switch the platform to `Nintendo 3DS` in build settings
+3. Configure `PlayerSettings` (exclusively `Publishing Settings`) like this:
+<br>
+
+![](https://i.imgur.com/4L22CPa.png)
+<br>
+
+4. Save the current scene, add it to the scenes list in `Build Settings`
+5. Import the [.unitypackage](https://github.com/xToxicLynx/CiaForgeX/releases), select a SystemMode other than `64MB (Default)`
+6. Build
+
+Now try running the build on **citra** or your **3ds**. If it doesn't crash (on citra a crash means **Speed 0%**), continue with the next steps:
+
+7.  Right click anywhere in the `Project` window, select `Show in Explorer`
+8. Open the ProjectSettings folder, copy `ProjectSettings.asset`
+9. Open the ProjectSettings folder of your original project
+10. Delete the `ProjectSettings.asset` in it and paste the one you just copied
+
+Open your **original project** (the one in which you had issues building) and try **building** now.
+
+If it runs, configure the rest of `ProjectSettings.asset` to your needs.
+
+<br>
+
+If your **game crashes** again after configuring the PlayerSettings some more, you've probably changed something you shouldn't have.
+<br>
+For me changing the `Memory` section causes the game to crash (only **with extended memory mode** enabled though, so not 64MB). It also didn't help to revert my changes, it still crashed. That's why I had to create a new empty project and do the `PlayerSettings.asset` procedure all over again.
+
+![](https://i.imgur.com/5bWCskJ.png)
+
+I would recommend making a **backup of** `PlayerSettings.asset` once you get a **working version** of it or make **changes**, just in case you mess something up.
+
 <br>
 
 ---
