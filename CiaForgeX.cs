@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Diagnostics;
 using System.Collections;
@@ -13,7 +13,7 @@ public class CiaForgeX : EditorWindow
     public static void ShowWindow()
     {
         var window = GetWindow<CiaForgeX>("CiaForgeX");
-        window.position = new Rect(10, 30, 340, 260);
+        window.position = new Rect(10, 30, 340, 300);
         window.Show();
     }
 
@@ -39,6 +39,18 @@ public class CiaForgeX : EditorWindow
     {
         get { return EditorPrefs.GetString("CiaForgeX_n3dsSystemMode", "Default"); }
         private set { EditorPrefs.SetString("CiaForgeX_n3dsSystemMode", value); }
+    }
+
+    public static string cpuSpeedMode
+    {
+        get { return EditorPrefs.GetString("CiaForgeX_cpuSpeedMode", "Default"); }
+        private set { EditorPrefs.SetString("CiaForgeX_cpuSpeedMode", value); }
+    }
+
+    public static bool enableL2Cache
+    {
+        get { return EditorPrefs.GetBool("CiaForgeX_enableL2Cache", false); }
+        private set { EditorPrefs.SetBool("CiaForgeX_enableL2Cache", value); }
     }
 
     public static bool removeCCI
@@ -76,6 +88,15 @@ public class CiaForgeX : EditorWindow
             string[] n3dsModeOptions = { "Default", "124MB", "178MB" };
             int n3dsModeIndex = System.Array.IndexOf(n3dsModeOptions, n3dsSystemMode);
             n3dsSystemMode = n3dsModeOptions[EditorGUILayout.Popup("Set N3ds SystemMode to", n3dsModeIndex, n3dsModeOptions)];
+
+            GUILayout.Space(10);
+            GUILayout.Label("New 3ds Exclusive Options", EditorStyles.boldLabel);
+            string[] cpuSpeedOptions = { "268MHz (Default)", "804MHz" };
+            int cpuSpeedIndex = System.Array.IndexOf(cpuSpeedOptions, cpuSpeedMode);
+            cpuSpeedMode = cpuSpeedOptions[EditorGUILayout.Popup("Set CpuSpeed to", cpuSpeedIndex, cpuSpeedOptions)];
+
+            GUILayout.Space(3);
+            enableL2Cache = EditorGUILayout.Toggle("Enable L2 Cache", enableL2Cache);
         }
 
         GUILayout.Space(5);
@@ -85,7 +106,6 @@ public class CiaForgeX : EditorWindow
         removeXML = EditorGUILayout.Toggle("Remove XML file", removeXML);
     }
 }
-
 
 public class PostBuildHook
 {
@@ -142,17 +162,69 @@ public class PostBuildHook
 
     static void BuildCIA(string cciPath, string toolsPath, string tempPath)
     {
-        File.Copy(toolsPath + "3dsconv.exe", tempPath + "3dsconv.exe");
+        File.Copy(toolsPath + "3dstool.exe", tempPath + "3dstool.exe");
+        File.Copy(toolsPath + "dummy.rsf", tempPath + "game.rsf");
+        File.Copy(toolsPath + "ignore_3dstool.txt", tempPath + "ignore_3dstool.txt");
+        File.Copy(toolsPath + "rsfgen.exe", tempPath + "rsfgen.exe");
 
-        EditorUtility.DisplayProgressBar("CiaForgeX", "Converting to CIA file", 0.7f);
-        Process ciaBuild = new Process();
-        ciaBuild.StartInfo.FileName = tempPath + "3dsconv.exe";
-        ciaBuild.StartInfo.Arguments = "game.3ds";
-        ciaBuild.StartInfo.WorkingDirectory = tempPath;
-        ciaBuild.StartInfo.CreateNoWindow = true;
-        ciaBuild.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-        ciaBuild.Start();
-        ciaBuild.WaitForExit();
+        string manualPath = Directory.GetParent(Application.dataPath).FullName + "\\Temp\\StagingArea\\Manual\\Manual.cfa";
+        bool hasManual = File.Exists(manualPath);
+        if (hasManual) File.Copy(manualPath, tempPath + "Manual.cfa", true);
+
+        EditorUtility.DisplayProgressBar("CiaForgeX", "Extracting rom", 0.5f);
+        Process extractionProcess = new Process();
+        extractionProcess.StartInfo.FileName = tempPath + "ctrtool.exe";
+        extractionProcess.StartInfo.Arguments = "--exefsdir=exefs --romfsdir=romfs --exheader=exheader.bin game.3ds";
+        extractionProcess.StartInfo.WorkingDirectory = tempPath;
+        extractionProcess.StartInfo.UseShellExecute = true;
+        extractionProcess.StartInfo.CreateNoWindow = true;
+        extractionProcess.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        extractionProcess.Start();
+        extractionProcess.WaitForExit();
+
+        EditorUtility.DisplayProgressBar("CiaForgeX", "Rebuilding romfs.bin", 0.6f);
+        Process romfsRebuild = new Process();
+        romfsRebuild.StartInfo.FileName = tempPath + "3dstool.exe";
+        romfsRebuild.StartInfo.Arguments = "-cvtf romfs romfs.bin --romfs-dir romfs/";
+        romfsRebuild.StartInfo.WorkingDirectory = tempPath;
+        romfsRebuild.StartInfo.UseShellExecute = false;
+        romfsRebuild.StartInfo.CreateNoWindow = true;
+        romfsRebuild.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        romfsRebuild.Start();
+        romfsRebuild.WaitForExit();
+
+        EditorUtility.DisplayProgressBar("CiaForgeX", "Generating RSF file", 0.7f);
+        Process rsfGeneration = new Process();
+        rsfGeneration.StartInfo.FileName = tempPath + "rsfgen.exe";
+        rsfGeneration.StartInfo.Arguments = "-r game.3ds -e exheader.bin -o game.rsf";
+        rsfGeneration.StartInfo.WorkingDirectory = tempPath;
+        rsfGeneration.StartInfo.UseShellExecute = false;
+        rsfGeneration.StartInfo.CreateNoWindow = true;
+        rsfGeneration.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        rsfGeneration.Start();
+        rsfGeneration.WaitForExit();
+
+        EditorUtility.DisplayProgressBar("CiaForgeX", "Rebuilding CXI/CIA file", 0.9f);
+        Process cxiRebuild = new Process();
+        cxiRebuild.StartInfo.FileName = tempPath + "makerom.exe";
+        cxiRebuild.StartInfo.Arguments = "-f cxi -o game.cxi -rsf game.rsf -code exefs/code.bin -icon exefs/icon.bin -banner exefs/banner.bin -exheader exheader.bin -romfs romfs.bin";
+        cxiRebuild.StartInfo.WorkingDirectory = tempPath;
+        cxiRebuild.StartInfo.UseShellExecute = false;
+        cxiRebuild.StartInfo.CreateNoWindow = true;
+        cxiRebuild.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        cxiRebuild.Start();
+        cxiRebuild.WaitForExit();
+
+        Process ciaRebuild = new Process();
+        ciaRebuild.StartInfo.FileName = tempPath + "makerom.exe";
+        ciaRebuild.StartInfo.Arguments = "-f cia -o game.cia -content game.cxi:0:0";
+        if (hasManual) ciaRebuild.StartInfo.Arguments += " -content Manual.cfa:1:1";
+        ciaRebuild.StartInfo.WorkingDirectory = tempPath;
+        ciaRebuild.StartInfo.UseShellExecute = false;
+        ciaRebuild.StartInfo.CreateNoWindow = true;
+        ciaRebuild.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+        ciaRebuild.Start();
+        ciaRebuild.WaitForExit();
 
         string outputDirectory = Path.GetDirectoryName(cciPath);
         string fileName = Path.GetFileNameWithoutExtension(cciPath);
@@ -261,6 +333,27 @@ public class PostBuildHook
                 rsfLines.RemoveAll(line => line.TrimStart().StartsWith("SystemModeExt"));
                 if (memoryTypeIndex2 != -1) rsfLines.Insert(memoryTypeIndex2 + 2, extModeLine);
             }
+        }
+
+        string cpuSpeedValue;
+        if (CiaForgeX.cpuSpeedMode != "268MHz (Default)")
+            cpuSpeedValue = "804MHz";
+        else
+            cpuSpeedValue = "268MHz";
+        string cpuSpeedLine = "  CpuSpeed                      : " + cpuSpeedValue;
+
+        string l2CacheValue = CiaForgeX.enableL2Cache.ToString().ToLower();
+        string l2CacheLine = "  EnableL2Cache                 : " + l2CacheValue;
+
+        int memoryTypeIndex3 = rsfLines.FindIndex(line => line.TrimStart().StartsWith("MemoryType"));
+
+        rsfLines.RemoveAll(line => line.TrimStart().StartsWith("CpuSpeed"));
+        rsfLines.RemoveAll(line => line.TrimStart().StartsWith("EnableL2Cache"));
+
+        if (memoryTypeIndex3 != -1)
+        {
+            rsfLines.Insert(memoryTypeIndex3 + 1, cpuSpeedLine);
+            rsfLines.Insert(memoryTypeIndex3 + 1, l2CacheLine);
         }
 
         ReplaceConfigValue(rsfLines, "DisableDebug                  ", "false");
