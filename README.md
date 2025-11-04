@@ -24,13 +24,17 @@ Many thanks to [@CooingMaxito](https://www.github.com/CooingMaxito), who wrote t
 
 * Supports **two export modes**:
 
-  * `Build CIA` – fast export via `3dsconv.exe`
+  * `Build CIA` – Converts built `.cci` to `.cia` via makerom
   * `Extract, Modify and Rebuild CIA` – for advanced memory configs & flag injection
 * **Extended memory** options:
 
   * Old 3DS: `32MB`, `72MB`, `80MB`, `96MB`
   * New 3DS: `124MB`, `178MB`
   * ⚠️**Note:** `96MB` Does not currently work (probably never will), as it crashes the game on boot
+* **N3DS specific** options:
+
+  * Cpu Speed: `268MHz`, `804MHz`
+  * Enable L2 Cache: `true`/`false`
 * Uses standard **3DS dev tools**:
 
   * `ctrtool`, `makerom`, `3dstool`, `rsfgen`, `3dsconv`
@@ -47,7 +51,7 @@ After importing the .unitypackage, select `3DS` > `CiaForgeX` and the configurat
 
 #### Build CIA (Quick Mode)
 
-* Simply exports your `.cci` as a `.cia` using `3dsconv.exe`
+* Simply converts your `.cci` as a `.cia` using `makerom.exe`
 * Best if you're not using extended memory or modifying the RSF
 * If you're just looking for a way to automatically export your games to `.cia`  format, use this mode
 
