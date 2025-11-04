@@ -13,7 +13,7 @@ public class CiaForgeX : EditorWindow
     public static void ShowWindow()
     {
         var window = GetWindow<CiaForgeX>("CiaForgeX");
-        window.position = new Rect(10, 30, 340, 300);
+        window.position = new Rect(10, 30, 340, 330);
         window.Show();
     }
 
@@ -43,7 +43,7 @@ public class CiaForgeX : EditorWindow
 
     public static string cpuSpeedMode
     {
-        get { return EditorPrefs.GetString("CiaForgeX_cpuSpeedMode", "Default"); }
+        get { return EditorPrefs.GetString("CiaForgeX_cpuSpeedMode", "268MHz (Default)"); }
         private set { EditorPrefs.SetString("CiaForgeX_cpuSpeedMode", value); }
     }
 
