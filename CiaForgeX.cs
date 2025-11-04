@@ -43,13 +43,13 @@ public class CiaForgeX : EditorWindow
 
     public static string cpuSpeedMode
     {
-        get { return EditorPrefs.GetString("CiaForgeX_cpuSpeedMode", "268MHz (Default)"); }
+        get { return EditorPrefs.GetString("CiaForgeX_cpuSpeedMode", "804MHz"); }
         private set { EditorPrefs.SetString("CiaForgeX_cpuSpeedMode", value); }
     }
 
     public static bool enableL2Cache
     {
-        get { return EditorPrefs.GetBool("CiaForgeX_enableL2Cache", false); }
+        get { return EditorPrefs.GetBool("CiaForgeX_enableL2Cache", true); }
         private set { EditorPrefs.SetBool("CiaForgeX_enableL2Cache", value); }
     }
 
